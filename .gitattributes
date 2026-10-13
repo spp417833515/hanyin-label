@@ -1,0 +1,12 @@
+# 默认按文本处理, 仓库里统一 LF
+* text=auto
+
+# 这些文件编码/换行有要求, 原样保存:
+#   .bat 是 GBK + CRLF; .isl 是 UTF-8 BOM + CRLF (Inno Setup 要求)
+*.bat -text
+*.isl -text
+*.iss -text
+*.ps1 -text
+
+*.ico binary
+*.png binary

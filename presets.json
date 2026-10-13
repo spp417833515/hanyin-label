@@ -1,0 +1,28 @@
+{
+  "printer": {
+    "queue": "HPRT HM-T260L",
+    "usb_id": "HPRTHM-T260L",
+    "bt_port": "COM5",
+    "dpi": 203,
+    "via": "auto"
+  },
+  "default_preset": "25x15",
+  "presets": {
+    "25x15": {
+      "size": [25, 15]
+    },
+    "25x15-二维码": {
+      "size": [25, 15],
+      "layout": "qr"
+    },
+    "30x20": {
+      "size": [30, 20]
+    },
+    "40x30": {
+      "size": [40, 30]
+    },
+    "50x30": {
+      "size": [50, 30]
+    }
+  }
+}

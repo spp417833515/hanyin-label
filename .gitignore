@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# 运行数据 (模板、密钥哈希、日志); 安装版数据在 %LOCALAPPDATA%\HanyinLabel\data
+data/
+
+# 构建产物
+build/.venv/
+build/dist/
+build/work/
+build/output/
+build/*.log
+
+# label.py 生成的预览 / 字节流
+preview.png
+*.prn

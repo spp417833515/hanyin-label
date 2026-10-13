@@ -1,0 +1,878 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>汉印标签打印 · 5 套界面方案</title>
+<style>
+:root{--font:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif;--mono:Consolas,"Cascadia Mono","Courier New",monospace}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:#E4E8EC;color:#1B2430;font-size:14px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+code{font-family:var(--mono)}
+
+/* ---------- 页面外壳 ---------- */
+.page-head{max-width:1320px;margin:0 auto;padding:28px 20px 8px}
+.page-head h1{margin:0 0 6px;font-size:26px}
+.page-head p{margin:0;color:#4A5563;line-height:1.7}
+nav.jump{position:sticky;top:0;z-index:20;background:rgba(228,232,236,.94);backdrop-filter:blur(6px);border-bottom:1px solid #CCD3DA}
+nav.jump div{max-width:1320px;margin:0 auto;padding:10px 20px;display:flex;flex-wrap:wrap;gap:8px}
+nav.jump a{display:inline-flex;align-items:center;height:34px;padding:0 14px;border-radius:17px;background:#fff;color:#1B2430;text-decoration:none;font-size:13.5px;box-shadow:0 0 0 1px #CCD3DA}
+nav.jump a:hover{box-shadow:0 0 0 2px #1B2430}
+section.design{max-width:1320px;margin:0 auto;padding:30px 20px 10px;scroll-margin-top:56px}
+.dhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:12px}
+.dhead h2{margin:0;font-size:21px}
+.dhead p{margin:0;color:#4A5563}
+.notes{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.note{flex:1 1 260px;background:#fff;border-radius:10px;padding:12px 14px;line-height:1.65;box-shadow:0 0 0 1px #D5DCE4}
+.note b{display:block;margin-bottom:2px}
+.win{border-radius:10px;overflow:hidden;box-shadow:0 14px 36px rgba(20,30,40,.18),0 0 0 1px rgba(20,30,40,.14);background:#fff}
+.titlebar{height:34px;display:flex;align-items:center;padding-left:14px;font-size:12px;background:#F3F5F7;border-bottom:1px solid #D9DEE4;color:#3D4855;user-select:none}
+.titlebar .sp{flex:1}
+.titlebar .wb{width:46px;height:34px;display:grid;place-items:center;color:#5A6573}
+
+/* ---------- 共用: 标签预览 / 状态 / 字段 ---------- */
+.label{display:block;position:relative;background:#fff;color:#111;border-radius:5px;box-shadow:0 0 0 1px #CFC9BC;overflow:hidden;flex:none}
+.lbl-lines{position:absolute;display:flex;flex-direction:column;justify-content:center;align-items:center;line-height:1.2;white-space:nowrap}
+.lbl-line{padding:0 2px;border-radius:2px}
+[data-label="edit"] .lbl-line{cursor:pointer}
+[data-label="edit"] .lbl-line:hover{background:rgba(31,95,191,.08)}
+[data-label="edit"] .lbl-line.sel{outline:2px dashed var(--acc);outline-offset:1px}
+.tok{background:#E3EDFB;color:#1D4683;border-radius:3px;padding:0 .1em}
+.lbl-qr{position:absolute;color:#111}
+.lbl-qr svg{width:100%;height:100%;display:block}
+.backing{background:#F4F1EA;padding:16px 20px;border-radius:10px;box-shadow:inset 0 0 0 1px #E3DDCF}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:14px;font-size:12.5px;white-space:nowrap}
+.pill.ok{background:#E6F4EC;color:#15603A}
+.pill.info{background:#E8EEF8;color:#1D4683}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.vchip{height:28px;padding:0 8px;border:1px solid #BFD3F2;border-radius:4px;background:#EDF3FC;color:#1D4683;font-family:var(--mono);font-size:12.5px}
+.vchip:hover{border-color:#1D4683}
+.fields{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;align-items:center;gap:8px;margin:0}
+.fld-k{flex:0 0 92px;font-size:13px;color:#3D4855;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld.auto .fld-k{font-family:var(--mono);font-size:12.5px}
+.fld input{flex:1;min-width:0;height:34px;padding:0 10px;border:1px solid #C9D2DC;border-radius:6px;background:#fff}
+.fld .fld-v{flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center;gap:8px;height:34px;padding:0 10px;border-radius:6px;background:#F3F6F9;font-size:13px}
+.fld em{font-style:normal;font-size:11.5px;color:#5A6573;white-space:nowrap}
+.stepper{display:inline-flex;align-items:center;border:1px solid #C9D2DC;border-radius:6px;background:#fff}
+.stepper button{width:36px;height:36px;border:0;background:transparent;font-size:18px}
+.stepper span{min-width:36px;text-align:center;font-weight:700}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1B2430;color:#fff;padding:12px 20px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.show{opacity:1}
+.sr{position:absolute;left:-9999px}
+
+/* ---------- 方案 A 经典三栏 ---------- */
+#A{--acc:#1F5FBF}
+#A .app{display:flex;flex-direction:column;min-height:760px;background:#E9EDF2}
+#A .hdr{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:9px 18px;background:#fff;border-bottom:1px solid #D5DCE4}
+#A .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+#A .model{font-size:12px;font-weight:400;color:#5A6573;border:1px solid #D5DCE4;border-radius:4px;padding:1px 7px}
+#A .acts{display:flex;flex-wrap:wrap;gap:2px;flex:1 1 auto}
+#A .ghost{display:flex;align-items:center;gap:6px;height:34px;padding:0 11px;border:0;border-radius:6px;background:transparent}
+#A .ghost:hover{background:#EEF2F6}
+#A .sizebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:9px 18px;background:#fff;border-bottom:1px solid #D5DCE4}
+#A .chip{height:32px;padding:0 14px;border-radius:6px;border:1px solid #C9D2DC;background:#fff}
+#A .chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+#A .chip.dash{border-style:dashed;color:#3D4855}
+#A .body{display:flex;flex-wrap:wrap;flex:1 1 auto}
+#A .side{flex:1 1 240px;max-width:100%;background:#fff;border-right:1px solid #D5DCE4;padding:14px;display:flex;flex-direction:column;gap:10px}
+#A .side h3,#A .props h3{margin:0;font-size:14.5px}
+#A .search{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border:1px solid #C9D2DC;border-radius:6px}
+#A .search input{border:0;outline:none;flex:1;min-width:0;background:transparent}
+#A .tpl{display:flex;align-items:center;gap:10px;padding:7px;border-radius:8px;border:1px solid transparent;background:transparent;text-align:left;width:100%}
+#A .tpl:hover{background:#F2F5F8}
+#A .tpl.on{border-color:var(--acc);background:#EDF3FC}
+#A .tpl .thumb{width:66px;height:42px;display:grid;place-items:center;flex:none}
+#A .tpl small{display:block;color:#5A6573;font-size:12px}
+#A .center{flex:999 1 520px;min-width:0;display:flex;flex-direction:column}
+#A .tools{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:7px 14px;background:#F6F8FA;border-bottom:1px solid #D5DCE4}
+#A .tool{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid #C9D2DC;border-radius:6px;background:#fff}
+#A .stage{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 14px;background:#DCE2E9;min-height:380px}
+#A .props{flex:1 1 300px;max-width:100%;background:#fff;border-left:1px solid #D5DCE4}
+#A .tabs2{display:flex;border-bottom:1px solid #D5DCE4}
+#A .tabs2 button{flex:1;height:42px;border:0;border-bottom:2px solid transparent;background:transparent;color:#5A6573}
+#A .tabs2 button.on{border-bottom-color:var(--acc);color:#1B2430;font-weight:700}
+#A .pbody{padding:14px;display:flex;flex-direction:column;gap:14px}
+#A .lbl{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}
+#A .txt{height:36px;padding:0 10px;border:1px solid #C9D2DC;border-radius:6px;background:#fff;font-weight:400;font-family:var(--mono)}
+#A .conv{padding:11px 12px;border-radius:8px;background:#F3F6F9;display:flex;flex-direction:column;gap:4px}
+#A .conv span{font-size:12px;color:#5A6573}
+#A .conv b{font-size:16px}
+#A .foot{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:10px 18px;background:#fff;border-top:1px solid #D5DCE4}
+#A .foot select{height:38px;padding:0 8px;border:1px solid #C9D2DC;border-radius:6px;background:#fff}
+#A .primary{display:flex;align-items:center;gap:8px;height:42px;padding:0 26px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-size:15px;font-weight:700}
+#A .primary:hover{background:#174A94}
+
+/* ---------- 方案 B 快捷打印台 ---------- */
+#B{--acc:#C2410C}
+#B .app{background:#F4F5F7;min-height:760px;display:flex;flex-direction:column}
+#B .hdr{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:16px 24px;background:#fff;border-bottom:1px solid #E1E4E8}
+#B .hdr h3{margin:0;font-size:24px}
+#B .hdr .sp{flex:1}
+#B .ready{display:flex;align-items:center;gap:10px;height:44px;padding:0 18px;border-radius:22px;background:#E6F4EC;color:#15603A;font-weight:700;font-size:16px}
+#B .gear{width:44px;height:44px;border-radius:22px;border:1px solid #D5D9DF;background:#fff;display:grid;place-items:center}
+#B .sizes{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:18px 24px 6px}
+#B .sz{height:78px;border-radius:12px;border:2px solid #D5D9DF;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;font-size:19px;font-weight:700}
+#B .sz .ar{border:2px solid currentColor;border-radius:3px}
+#B .sz.on{border-color:var(--acc);background:#FFF1EA;color:var(--acc)}
+#B .main{display:flex;flex-wrap:wrap;gap:20px;padding:16px 24px 24px;flex:1}
+#B .grid{flex:999 1 500px;min-width:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;align-content:start}
+#B .gtitle{grid-column:1/-1;font-size:15px;font-weight:700;color:#3D4855}
+#B .card{border-radius:14px;border:2px solid #E1E4E8;background:#fff;padding:12px;display:flex;flex-direction:column;gap:10px;text-align:left}
+#B .card:hover{border-color:#C7CCD2}
+#B .card.on{border-color:var(--acc);box-shadow:0 0 0 4px #FCDCCB}
+#B .card .thumb{height:84px;display:grid;place-items:center;background:#F4F1EA;border-radius:8px}
+#B .card b{font-size:16px}
+#B .card small{color:#5A6573}
+#B .panel{flex:1 1 380px;max-width:100%;background:#fff;border-radius:16px;border:1px solid #E1E4E8;padding:20px;display:flex;flex-direction:column;gap:16px}
+#B .panel h4{margin:0;font-size:17px}
+#B .fields{gap:10px}
+#B .fld-k{font-size:15px;flex-basis:74px}
+#B .fld input{height:50px;font-size:18px;border-radius:10px;border-width:2px}
+#B .fld input:focus{outline:none;border-color:var(--acc)}
+#B .fld .fld-v{height:50px;font-size:16px;border-radius:10px}
+#B .bigstep{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#B .bigstep .stepper{border-width:2px;border-radius:12px}
+#B .bigstep .stepper button{width:58px;height:58px;font-size:26px}
+#B .bigstep .stepper span{font-size:24px;min-width:64px}
+#B .go{height:74px;border:0;border-radius:14px;background:var(--acc);color:#fff;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:12px}
+#B .go:hover{background:#9A3412}
+#B .hint{font-size:13px;color:#5A6573;line-height:1.6}
+
+/* ---------- 方案 C 三步向导 ---------- */
+#C{--acc:#1E7A4F}
+#C .app{background:#EEF2EF;min-height:760px;display:flex;flex-direction:column}
+#C .hdr{background:#fff;padding:14px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;border-bottom:1px solid #D9E1DB}
+#C .hdr b{font-size:17px}
+#C .steps{display:flex;flex-wrap:wrap;align-items:center;gap:10px;flex:1 1 auto;justify-content:center}
+#C .st{display:flex;align-items:center;gap:8px;font-weight:600;color:#5A6573}
+#C .st i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-style:normal;border:2px solid #B9C6BD;background:#fff;font-size:13px}
+#C .st.done i{background:var(--acc);border-color:var(--acc);color:#fff}
+#C .st.cur{color:#1B2430}
+#C .st.cur i{border-color:var(--acc);color:var(--acc)}
+#C .bar{width:48px;height:2px;background:#B9C6BD}
+#C .bar.done{background:var(--acc)}
+#C .cols{display:flex;flex-wrap:wrap;gap:16px;padding:18px 24px;flex:1;align-items:flex-start}
+#C .col{background:#fff;border-radius:12px;border:1px solid #D9E1DB;padding:16px;display:flex;flex-direction:column;gap:12px}
+#C .c1{flex:1 1 220px}
+#C .c2{flex:3 1 420px;min-width:0;box-shadow:0 0 0 2px var(--acc)}
+#C .c3{flex:2 1 300px}
+#C .col h4{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
+#C .col h4 i{width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-style:normal;font-size:12px;display:grid;place-items:center}
+#C .sub{font-size:12.5px;color:#5A6573;font-weight:600}
+#C .szrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #D9E1DB;border-radius:8px;background:#fff;text-align:left;width:100%}
+#C .szrow .radio{width:16px;height:16px;border-radius:50%;border:2px solid #9AAAA0;flex:none;display:grid;place-items:center}
+#C .szrow.on{border-color:var(--acc);background:#E9F4EE}
+#C .szrow.on .radio{border-color:var(--acc)}
+#C .szrow.on .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc)}
+#C .szrow .ar{border:1.5px solid #6B7A70;border-radius:2px;margin-left:auto}
+#C .tchips{display:flex;flex-wrap:wrap;gap:6px}
+#C .tc{height:32px;padding:0 12px;border-radius:16px;border:1px solid #C9D3CC;background:#fff}
+#C .tc.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#C .seg{display:inline-flex;border:1px solid #C9D3CC;border-radius:8px;overflow:hidden}
+#C .seg button{height:32px;padding:0 14px;border:0;background:#fff}
+#C .seg button+button{border-left:1px solid #C9D3CC}
+#C .seg button.on{background:#E9F4EE;color:var(--acc);font-weight:700}
+#C .stage{background:#F4F1EA;border-radius:10px;padding:16px;display:grid;place-items:center}
+#C .le{display:flex;flex-direction:column;gap:8px}
+#C .le-row{display:flex;align-items:center;gap:8px}
+#C .le-n{width:22px;height:22px;border-radius:50%;background:#E4EAE6;font-size:12px;display:grid;place-items:center;flex:none}
+#C .le-row input{flex:1;min-width:0;height:36px;padding:0 10px;border:1px solid #C9D3CC;border-radius:6px;font-family:var(--mono)}
+#C .le-row.on input{border-color:var(--acc);box-shadow:0 0 0 3px #D5EBDD;outline:none}
+#C .le-del{width:30px;height:30px;border:0;background:transparent;color:#5A6573;font-size:18px;border-radius:6px}
+#C .le-del:hover{background:#EEF2EF}
+#C .le-add{height:34px;border:1px dashed #9AAAA0;border-radius:6px;background:#fff;color:#3D4855}
+#C table{border-collapse:collapse;width:100%;font-size:13px}
+#C td{padding:7px 4px;border-bottom:1px solid #E4EAE6}
+#C td:first-child{font-family:var(--mono);color:#1D4683}
+#C .foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:12px 24px;background:#fff;border-top:1px solid #D9E1DB}
+#C .btn{height:40px;padding:0 20px;border-radius:8px;border:1px solid #C9D3CC;background:#fff}
+#C .btn.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+#C .btn.pri:hover{background:#17603E}
+
+/* ---------- 方案 D 暗色控制中心 ---------- */
+#D{--acc:#4FC3D9;background:#0F1418}
+#D .titlebar{background:#0B0F12;color:#9FB0BC;border-bottom-color:#1F2A31}
+#D .titlebar .wb{color:#8FA1AE}
+#D .app{display:flex;flex-wrap:wrap;min-height:760px;background:#0F1418;color:#DCE6EC}
+#D .rail{flex:0 0 78px;background:#0B0F12;border-right:1px solid #1F2A31;display:flex;flex-direction:column;gap:4px;padding:10px 6px}
+#D .rail button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 0;border:0;border-radius:8px;background:transparent;color:#8FA1AE;font-size:11.5px}
+#D .rail button:hover{background:#141C21}
+#D .rail button.on{background:#17232A;color:var(--acc)}
+#D .main{flex:1 1 600px;min-width:0;display:flex;flex-direction:column;gap:14px;padding:16px}
+#D .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+#D .card{background:#151D23;border:1px solid #22303A;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:5px}
+#D .card .k{font-size:12px;color:#8FA1AE}
+#D .card .v{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+#D .card .s{font-size:12px;color:#8FA1AE;font-family:var(--mono)}
+#D .good{color:#4ADE80}
+#D .warn{color:#FBBF24}
+#D .split{display:flex;flex-wrap:wrap;gap:14px;flex:1}
+#D .pane{background:#151D23;border:1px solid #22303A;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+#D .pane h4{margin:0;font-size:14.5px;display:flex;align-items:center;gap:8px}
+#D .pane h4 .sp{flex:1}
+#D .p1{flex:1 1 380px}
+#D .p2{flex:1 1 420px;min-width:0}
+#D .chips{display:flex;flex-wrap:wrap;gap:6px}
+#D .chip{height:30px;padding:0 12px;border-radius:6px;border:1px solid #2C3B46;background:#1A242B;color:#C8D4DC}
+#D .chip.on{background:var(--acc);border-color:var(--acc);color:#0B1216;font-weight:700}
+#D .fld-k{color:#9FB0BC}
+#D .fld input{background:#0F1418;border-color:#2C3B46;color:#E6EEF3}
+#D .fld .fld-v{background:#1A242B;color:#C8D4DC}
+#D .fld em{color:#8FA1AE}
+#D .stage{background:#0B0F12;border-radius:10px;padding:18px;display:grid;place-items:center}
+#D .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+#D .row .sp{flex:1}
+#D .stepper{background:#0F1418;border-color:#2C3B46}
+#D .go{height:40px;border:0;border-radius:8px;background:var(--acc);color:#0B1216;font-weight:700;padding:0 22px}
+#D .ep{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#0F1418;font-family:var(--mono);font-size:13px}
+#D .ep span:last-child{color:#8FA1AE;font-family:var(--font);font-size:12.5px;margin-left:auto}
+#D .m{font-size:11px;font-weight:700;padding:2px 6px;border-radius:4px;min-width:46px;text-align:center}
+#D .m.get{background:#12384A;color:#7DD3FC}
+#D .m.post{background:#3B2A10;color:#FBBF24}
+#D pre{margin:0;padding:12px;border-radius:8px;background:#0B0F12;border:1px solid #22303A;font-family:var(--mono);font-size:12.5px;line-height:1.55;color:#C8D4DC;white-space:pre-wrap;word-break:break-all}
+#D .logbox{overflow-x:auto}
+#D .log{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px}
+#D .log td{padding:6px 6px;border-bottom:1px solid #1F2A31;color:#B7C4CD;white-space:nowrap}
+#D .switch{width:40px;height:22px;border-radius:11px;background:var(--acc);position:relative;border:0;flex:none}
+#D .switch::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#0B1216}
+#D .tokenbox{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#9FB0BC}
+#D .tokenbox code{background:#0B0F12;border:1px solid #22303A;border-radius:6px;padding:4px 8px;color:#C8D4DC}
+
+/* ---------- 方案 E 迷你窗 + 悬浮条 ---------- */
+#E{--acc:#B4232A;background:transparent;box-shadow:none;border-radius:12px}
+#E .desk{background-color:#C9D0D7;background-image:radial-gradient(#B7C0C8 1px,transparent 1px);background-size:18px 18px;padding:28px;display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;min-height:760px;border-radius:12px}
+#E .cw{width:400px;max-width:100%;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 18px 40px rgba(20,30,40,.28),0 0 0 1px rgba(20,30,40,.18)}
+#E .tb{height:40px;display:flex;align-items:center;gap:6px;padding:0 6px 0 14px;background:#1E2328;color:#fff;font-size:13px}
+#E .tb .sp{flex:1}
+#E .tb button{width:32px;height:32px;border:0;background:transparent;color:#C9D0D7;border-radius:6px;display:grid;place-items:center}
+#E .tb button.pin{color:#fff;background:#3A424A}
+#E .cbody{padding:14px;display:flex;flex-direction:column;gap:12px}
+#E .statusline{display:flex;flex-wrap:wrap;gap:6px;justify-content:space-between;font-size:12.5px;color:#3D4855}
+#E .statusline span{display:inline-flex;align-items:center;gap:6px}
+#E .on-dot{width:8px;height:8px;border-radius:50%;background:#1E8E4E}
+#E .seg{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid #CDD3D9;border-radius:8px;overflow:hidden}
+#E .seg button{height:34px;border:0;border-right:1px solid #CDD3D9;background:#fff;font-size:12.5px;padding:0}
+#E .seg button:last-child{border-right:0}
+#E .seg button.on{background:#1E2328;color:#fff;font-weight:700}
+#E select{height:38px;border:1px solid #CDD3D9;border-radius:8px;padding:0 10px;background:#fff;width:100%}
+#E .stage{background:#F4F1EA;border-radius:10px;padding:14px;display:grid;place-items:center}
+#E .fld-k{flex-basis:70px}
+#E .row{display:flex;gap:10px;align-items:center}
+#E .go{flex:1;height:44px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-weight:700;font-size:15px}
+#E .go:hover{background:#8F1B21}
+#E .side{display:flex;flex-direction:column;gap:30px;flex:1 1 380px;min-width:0}
+#E .cap{font-size:13px;color:#1E2328;font-weight:700;margin-bottom:8px}
+#E .fbar{display:flex;align-items:center;gap:10px;height:58px;padding:0 9px 0 16px;border-radius:29px;background:#1E2328;color:#fff;box-shadow:0 12px 30px rgba(20,30,40,.3);max-width:460px}
+#E .fbar .nm{font-weight:700;white-space:nowrap}
+#E .fbar .ln{color:#C9D0D7;font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#E .fbar .go2{height:40px;padding:0 18px;border:0;border-radius:20px;background:var(--acc);color:#fff;font-weight:700;white-space:nowrap}
+#E .tray{width:270px;max-width:100%;background:#fff;border-radius:10px;box-shadow:0 12px 30px rgba(20,30,40,.25);padding:6px;font-size:13px}
+#E .tray button{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:9px 12px;border:0;background:transparent;border-radius:6px;text-align:left}
+#E .tray button:hover{background:#F1F3F5}
+#E .tray hr{border:0;border-top:1px solid #E4E7EB;margin:4px 0}
+#E .tray .st{color:#15603A;display:inline-flex;align-items:center;gap:6px}
+#E kbd{font-family:var(--mono);font-size:11.5px;color:#5A6573}
+#E .explain{background:rgba(255,255,255,.85);border-radius:10px;padding:12px 14px;line-height:1.7;font-size:13px;max-width:460px}
+
+/* ---------- 共同能力 ---------- */
+.common{max-width:1320px;margin:0 auto;padding:34px 20px 60px}
+.common h2{margin:0 0 12px;font-size:21px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.cbox{background:#fff;border-radius:12px;padding:16px;box-shadow:0 0 0 1px #D5DCE4;line-height:1.7}
+.cbox h3{margin:0 0 8px;font-size:15.5px}
+.cbox table{border-collapse:collapse;width:100%;font-size:13px}
+.cbox td,.cbox th{padding:6px 6px;border-bottom:1px solid #E7EBEF;text-align:left;vertical-align:top}
+.cbox th{font-size:12px;color:#5A6573;font-weight:600}
+.cbox td code{color:#1D4683}
+.cbox ul{margin:0;padding-left:18px}
+.m2{font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px}
+.m2.get{background:#E0F2FE;color:#075985}
+.m2.post{background:#FEF3C7;color:#92400E}
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>汉印标签打印 · 5 套界面方案</h1>
+  <p>每套都包含：标签尺寸预设（一键切换）· 标签模板（选尺寸后设计内容，支持 <code>{日期}</code> <code>{流水号}</code> <code>{品名}</code> 这类参数，打印时自动替换）· 快捷编辑 · 打印机在线状态 · 局域网 API 状态。<br>
+  界面里的按钮都能点：切尺寸、切模板、改文字、点变量插入、填内容，预览会实时变化（打印按钮为演示，不会真的打印）。</p>
+</header>
+
+<nav class="jump" aria-label="方案导航"><div>
+  <a href="#sec-A">A · 经典三栏工作台</a>
+  <a href="#sec-B">B · 快捷打印台</a>
+  <a href="#sec-C">C · 三步向导</a>
+  <a href="#sec-D">D · 暗色控制中心</a>
+  <a href="#sec-E">E · 迷你窗 + 悬浮条</a>
+  <a href="#sec-common">共同能力 / 变量写法 / API</a>
+</div></nav>
+
+<!-- ================= 方案 A ================= -->
+<section class="design" id="sec-A">
+  <div class="dhead"><h2>方案 A · 经典三栏工作台</h2><p>左边模板库，中间画布，右边属性；类似专业标签软件，但只保留常用功能。</p></div>
+  <div class="win" id="A" data-design data-tpl="prod">
+    <div class="titlebar"><span>汉印标签打印</span><span class="sp"></span><span class="wb">—</span><span class="wb">▢</span><span class="wb">✕</span></div>
+    <div class="app">
+      <div class="hdr">
+        <div class="brand">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5FBF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+          汉印标签打印 <span class="model">HM-T260L</span>
+        </div>
+        <div class="acts">
+          <button class="ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>新建模板</button>
+          <button class="ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/></svg>保存</button>
+          <button class="ghost"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M9 4v16"/></svg>导入表格批量打印</button>
+        </div>
+        <span class="pill ok"><span class="dot"></span>打印机在线 · USB</span>
+        <span class="pill info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01M2 9a14 14 0 0 1 20 0"/></svg>API 运行中 · 192.168.1.23:8765</span>
+      </div>
+      <div class="sizebar">
+        <span style="font-size:13px;color:#5A6573;margin-right:4px">标签尺寸</span>
+        <button class="chip" data-size="25x15">25×15</button>
+        <button class="chip" data-size="30x20">30×20</button>
+        <button class="chip" data-size="40x30">40×30</button>
+        <button class="chip" data-size="50x30">50×30</button>
+        <button class="chip dash" data-size="custom">+ 自定义</button>
+        <span style="flex:1"></span>
+        <span style="font-size:13px;color:#5A6573">间隙标签 · 203 dpi · 靠左进纸</span>
+      </div>
+      <div class="body">
+        <aside class="side">
+          <div style="display:flex;justify-content:space-between;align-items:center"><h3>标签模板</h3><button class="chip" style="height:28px;padding:0 10px;font-size:13px">+ 新建</button></div>
+          <div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><label class="sr" for="a-s">搜索模板</label><input id="a-s" placeholder="搜索模板"></div>
+          <button class="tpl" data-tpl="prod"><span class="thumb"><span data-mini="prod" data-fit="64x40"></span></span><span>生产日期标签<small>25×15 · 日期 / 流水号</small></span></button>
+          <button class="tpl" data-tpl="price"><span class="thumb"><span data-mini="price" data-fit="64x40"></span></span><span>商品价签<small>25×15 · 品名 / 价格</small></span></button>
+          <button class="tpl" data-tpl="loc"><span class="thumb"><span data-mini="loc" data-fit="64x40"></span></span><span>库位标签<small>30×20 · 二维码</small></span></button>
+          <button class="tpl" data-tpl="asset"><span class="thumb"><span data-mini="asset" data-fit="64x40"></span></span><span>资产标签<small>40×30 · 流水号</small></span></button>
+          <button class="tpl" data-tpl="ship"><span class="thumb"><span data-mini="ship" data-fit="64x40"></span></span><span>快递分拣<small>50×30 · 格口</small></span></button>
+        </aside>
+        <main class="center">
+          <div class="tools" role="toolbar" aria-label="插入元素">
+            <button class="tool"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6V4h16v2M12 4v16M9 20h6"/></svg>文本</button>
+            <button class="tool"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 4c-2 0-3 1-3 3v2c0 1-1 2-2 2 1 0 2 1 2 2v4c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1 1 2 2 2-1 0-2 1-2 2v4c0 2-1 3-3 3"/></svg>变量</button>
+            <button class="tool" data-layout="qr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/></svg>二维码</button>
+            <button class="tool" data-layout="text">去掉二维码</button>
+            <button class="tool" data-addline>+ 加一行</button>
+            <span style="flex:1"></span>
+            <span style="font-size:13px;color:#5A6573" data-sizename></span>
+          </div>
+          <div class="stage">
+            <div class="backing"><div data-label="edit" data-fit="420x250"></div></div>
+            <div style="font-size:13px;color:#3D4855">点标签上的某一行即可编辑 · 蓝色块是变量，打印时自动替换</div>
+          </div>
+        </main>
+        <aside class="props">
+          <div class="tabs2" role="tablist" aria-label="面板"><button class="on" role="tab" aria-selected="true">属性</button><button role="tab" aria-selected="false">变量</button><button role="tab" aria-selected="false">数据源</button></div>
+          <div class="pbody">
+            <label class="lbl">选中行内容<input class="txt" data-content></label>
+            <div class="lbl">插入变量
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <button class="vchip" data-insert="{日期}">{日期}</button>
+                <button class="vchip" data-insert="{时间}">{时间}</button>
+                <button class="vchip" data-insert="{流水号}">{流水号}</button>
+                <button class="vchip" data-insert="{日期+30天}">{日期+30天}</button>
+                <button class="vchip" data-insert="{输入:备注}">{输入:备注}</button>
+              </div>
+            </div>
+            <div class="conv"><span>这一行打印时会变成</span><b data-converted></b></div>
+            <div class="lbl">本次内容<div class="fields" data-fields></div></div>
+          </div>
+        </aside>
+      </div>
+      <div class="foot">
+        <span style="font-size:13px;color:#5A6573">模板：<b data-tplname></b> · 下一张流水号 <b data-serial></b></span>
+        <span style="flex:1"></span>
+        <span style="font-size:13px">份数</span>
+        <span class="stepper"><button data-dec aria-label="减少份数">−</button><span data-copies></span><button data-inc aria-label="增加份数">+</button></span>
+        <label class="sr" for="a-via">通道</label>
+        <select id="a-via"><option>自动（USB）</option><option>蓝牙 COM5</option></select>
+        <button class="primary" data-print><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/></svg><span data-printlabel></span></button>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <div class="note"><b>适合</b>需要经常新建、调整模板的人（办公室 / 仓管）。</div>
+    <div class="note"><b>亮点</b>所见即所得画布，点哪行改哪行；右侧随时看到"打印时会变成什么"。</div>
+    <div class="note"><b>代价</b>信息最多，第一次用需要熟悉一下；屏幕小时三栏会自动换行。</div>
+  </div>
+</section>
+
+<!-- ================= 方案 B ================= -->
+<section class="design" id="sec-B">
+  <div class="dhead"><h2>方案 B · 快捷打印台</h2><p>大按钮、大输入框，选模板 → 填空 → 打印，三下完成；适合柜台 / 产线 / 触屏。</p></div>
+  <div class="win" id="B" data-design data-tpl="price" data-enterprint>
+    <div class="titlebar"><span>汉印标签打印 · 快捷模式</span><span class="sp"></span><span class="wb">—</span><span class="wb">▢</span><span class="wb">✕</span></div>
+    <div class="app">
+      <div class="hdr">
+        <h3>快捷打印</h3>
+        <span class="sp"></span>
+        <span class="pill info">API 运行中 · 局域网可调用</span>
+        <span class="ready"><span class="dot"></span>打印机就绪 · USB</span>
+        <button class="gear" aria-label="设置"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3D4855" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></button>
+      </div>
+      <div class="sizes">
+        <button class="sz" data-size="25x15"><span class="ar" style="width:30px;height:18px"></span>25×15</button>
+        <button class="sz" data-size="30x20"><span class="ar" style="width:30px;height:20px"></span>30×20</button>
+        <button class="sz" data-size="40x30"><span class="ar" style="width:32px;height:24px"></span>40×30</button>
+        <button class="sz" data-size="50x30"><span class="ar" style="width:36px;height:22px"></span>50×30</button>
+        <button class="sz" data-size="custom"><span class="ar" style="width:28px;height:20px;border-style:dashed"></span>自定义</button>
+      </div>
+      <div class="main">
+        <div class="grid">
+          <div class="gtitle">选择模板</div>
+          <button class="card" data-tpl="price"><span class="thumb"><span data-mini="price" data-fit="150x70"></span></span><b>商品价签</b><small>25×15 · 填 品名、价格</small></button>
+          <button class="card" data-tpl="prod"><span class="thumb"><span data-mini="prod" data-fit="150x70"></span></span><b>生产日期标签</b><small>25×15 · 日期、流水号自动</small></button>
+          <button class="card" data-tpl="loc"><span class="thumb"><span data-mini="loc" data-fit="150x70"></span></span><b>库位标签</b><small>30×20 · 带二维码</small></button>
+          <button class="card" data-tpl="asset"><span class="thumb"><span data-mini="asset" data-fit="150x70"></span></span><b>资产标签</b><small>40×30 · 编号自动递增</small></button>
+          <button class="card" data-tpl="ship"><span class="thumb"><span data-mini="ship" data-fit="150x70"></span></span><b>快递分拣</b><small>50×30 · 填 格口</small></button>
+        </div>
+        <div class="panel">
+          <h4>本次打印 · <span data-tplname></span></h4>
+          <div class="backing" style="display:grid;place-items:center"><div data-label="print" data-fit="340x190"></div></div>
+          <div class="fields" data-fields></div>
+          <div class="bigstep"><span style="font-size:16px;font-weight:700">份数</span><span class="stepper"><button data-dec aria-label="减少份数">−</button><span data-copies></span><button data-inc aria-label="增加份数">+</button></span></div>
+          <button class="go" data-print><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/></svg><span data-printlabel></span></button>
+          <div class="hint">在输入框里按 <b>回车</b> 直接打印；扫码枪扫进来的内容会填进当前输入框。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <div class="note"><b>适合</b>每天大量重复打印、不需要改版式的人（店员 / 产线工人）。</div>
+    <div class="note"><b>亮点</b>按钮 ≥ 56px，触屏和扫码枪友好；只露出"要填的空"，日期流水号自动。</div>
+    <div class="note"><b>代价</b>模板设计要在另一个"设计模式"里做（可以用方案 A 作为设计模式）。</div>
+  </div>
+</section>
+
+<!-- ================= 方案 C ================= -->
+<section class="design" id="sec-C">
+  <div class="dhead"><h2>方案 C · 三步向导</h2><p>① 选尺寸 → ② 设计内容（表单式，不用拖拽）→ ③ 确认打印；适合新手。</p></div>
+  <div class="win" id="C" data-design data-tpl="prod">
+    <div class="titlebar"><span>汉印标签打印 · 向导</span><span class="sp"></span><span class="wb">—</span><span class="wb">▢</span><span class="wb">✕</span></div>
+    <div class="app">
+      <div class="hdr">
+        <b>新建标签</b>
+        <div class="steps">
+          <span class="st done"><i>✓</i>选择尺寸</span><span class="bar done"></span>
+          <span class="st cur"><i>2</i>设计内容</span><span class="bar"></span>
+          <span class="st"><i>3</i>确认打印</span>
+        </div>
+        <span class="pill ok"><span class="dot"></span>打印机在线</span>
+      </div>
+      <div class="cols">
+        <div class="col c1">
+          <h4><i>1</i>选择尺寸</h4>
+          <button class="szrow" data-size="25x15"><span class="radio"></span>25 × 15 mm<span class="ar" style="width:25px;height:15px"></span></button>
+          <button class="szrow" data-size="30x20"><span class="radio"></span>30 × 20 mm<span class="ar" style="width:30px;height:20px"></span></button>
+          <button class="szrow" data-size="40x30"><span class="radio"></span>40 × 30 mm<span class="ar" style="width:32px;height:24px"></span></button>
+          <button class="szrow" data-size="50x30"><span class="radio"></span>50 × 30 mm<span class="ar" style="width:36px;height:22px"></span></button>
+          <button class="szrow" data-size="custom"><span class="radio"></span>自定义…</button>
+        </div>
+        <div class="col c2">
+          <h4><i>2</i>设计内容</h4>
+          <span class="sub">从模板开始</span>
+          <div class="tchips">
+            <button class="tc" data-tpl="prod">生产日期</button><button class="tc" data-tpl="price">价签</button><button class="tc" data-tpl="loc">库位</button><button class="tc" data-tpl="asset">资产</button><button class="tc" data-tpl="ship">快递</button>
+          </div>
+          <span class="sub">版式</span>
+          <div><span class="seg"><button data-layout="text">纯文字</button><button data-layout="qr">左码右字</button></span></div>
+          <div class="stage"><div data-label="edit" data-fit="400x200"></div></div>
+          <span class="sub">每行内容（可直接写变量）</span>
+          <div class="le" data-lineeditor></div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="sub" style="margin-right:4px">插入：</span>
+            <button class="vchip" data-insert="{日期}">{日期}</button><button class="vchip" data-insert="{时间}">{时间}</button><button class="vchip" data-insert="{流水号}">{流水号}</button><button class="vchip" data-insert="{日期+30天}">{日期+30天}</button><button class="vchip" data-insert="{输入:规格}">{输入:规格}</button>
+          </div>
+        </div>
+        <div class="col c3">
+          <h4><i>3</i>确认打印</h4>
+          <div class="stage"><div data-label="print" data-fit="280x170"></div></div>
+          <span class="sub">打印时自动替换</span>
+          <table data-vartable></table>
+          <span class="sub">需要填写</span>
+          <div class="fields" data-fields></div>
+          <div style="display:flex;align-items:center;gap:10px"><span>份数</span><span class="stepper"><button data-dec aria-label="减少份数">−</button><span data-copies></span><button data-inc aria-label="增加份数">+</button></span></div>
+        </div>
+      </div>
+      <div class="foot">
+        <button class="btn">← 上一步</button>
+        <span style="font-size:13px;color:#5A6573">做好的设计可以"另存为模板"，下次一步直达第 3 步</span>
+        <div style="display:flex;gap:10px"><button class="btn">另存为模板</button><button class="btn pri" data-print><span data-printlabel></span></button></div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <div class="note"><b>适合</b>不常用、不熟电脑的人；每一步只做一件事。</div>
+    <div class="note"><b>亮点</b>表单式设计（每行一个输入框），比拖拽简单；第 3 步把"变量 → 实际值"列成表，一眼核对。</div>
+    <div class="note"><b>代价</b>熟练用户嫌步骤多 —— 可加"跳过向导直接打印上次模板"。</div>
+  </div>
+</section>
+
+<!-- ================= 方案 D ================= -->
+<section class="design" id="sec-D">
+  <div class="dhead"><h2>方案 D · 暗色控制中心</h2><p>设备状态 + 快速打印 + API 管理放在一屏；适合放在一台常开的电脑上当"局域网打印服务器"。</p></div>
+  <div class="win" id="D" data-design data-tpl="loc">
+    <div class="titlebar"><span>汉印标签打印 · 控制中心</span><span class="sp"></span><span class="wb">—</span><span class="wb">▢</span><span class="wb">✕</span></div>
+    <div class="app">
+      <nav class="rail" aria-label="主导航">
+        <button class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/></svg>打印</button>
+        <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/></svg>模板</button>
+        <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v14M9 6l3-3 3 3M7 11v2a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2"/><circle cx="12" cy="19" r="2"/></svg>设备</button>
+        <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg>API</button>
+        <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>记录</button>
+        <button><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>设置</button>
+      </nav>
+      <div class="main">
+        <div class="cards">
+          <div class="card"><span class="k">打印机 HM-T260L</span><span class="v good"><span class="dot"></span>在线 · USB</span><span class="s">最近心跳 2 秒前</span></div>
+          <div class="card"><span class="k">蓝牙 COM5</span><span class="v">可连接</span><span class="s">USB 断开时自动切换</span></div>
+          <div class="card"><span class="k">API 服务</span><span class="v good"><span class="dot"></span>运行中</span><span class="s">192.168.1.23:8765</span></div>
+          <div class="card"><span class="k">今日已打印</span><span class="v"><span data-count>36</span> 张</span><span class="s">失败 1 次（离线时）</span></div>
+        </div>
+        <div class="split">
+          <div class="pane p1">
+            <h4>快速打印<span class="sp"></span><span style="font-size:12px;color:#8FA1AE;font-weight:400" data-sizename></span></h4>
+            <div class="chips"><button class="chip" data-tpl="loc">库位</button><button class="chip" data-tpl="prod">生产日期</button><button class="chip" data-tpl="price">价签</button><button class="chip" data-tpl="asset">资产</button><button class="chip" data-tpl="ship">快递</button></div>
+            <div class="chips"><button class="chip" data-size="25x15">25×15</button><button class="chip" data-size="30x20">30×20</button><button class="chip" data-size="40x30">40×30</button><button class="chip" data-size="50x30">50×30</button><button class="chip" data-size="custom">自定义</button></div>
+            <div class="stage"><div data-label="print" data-fit="360x180"></div></div>
+            <div class="fields" data-fields></div>
+            <div class="row"><span>份数</span><span class="stepper"><button data-dec aria-label="减少份数">−</button><span data-copies></span><button data-inc aria-label="增加份数">+</button></span><span class="sp"></span><button class="go" data-print><span data-printlabel></span></button></div>
+          </div>
+          <div class="pane p2">
+            <h4>局域网 API<span class="sp"></span><span style="font-size:12.5px;color:#9FB0BC;font-weight:400">允许局域网访问</span><button class="switch" aria-label="允许局域网访问：已开启" aria-pressed="true"></button></h4>
+            <div class="tokenbox">访问令牌 <code>hm_••••••••3f9a</code><span style="color:#8FA1AE">（局域网调用需带上）</span></div>
+            <div class="ep"><span class="m get">GET</span>/api/status<span>在线状态、通道、队列</span></div>
+            <div class="ep"><span class="m get">GET</span>/api/templates<span>模板列表和每个模板要填的变量</span></div>
+            <div class="ep"><span class="m post">POST</span>/api/print<span>按模板打印，传变量值和份数</span></div>
+            <pre>curl -X POST http://192.168.1.23:8765/api/print \
+  -H "Authorization: Bearer hm_…3f9a" \
+  -d '{"template":"库位标签","fields":{"库位":"A-03-02"},"copies":2}'</pre>
+            <div class="logbox"><table class="log"><tbody data-log>
+              <tr><td>22:41:07</td><td>192.168.1.41</td><td>POST /api/print</td><td class="good">200 · 3 张</td></tr>
+              <tr><td>22:40:52</td><td>192.168.1.41</td><td>GET /api/status</td><td class="good">200</td></tr>
+              <tr><td>22:36:18</td><td>192.168.1.17</td><td>GET /api/templates</td><td class="good">200</td></tr>
+              <tr><td>22:30:02</td><td>192.168.1.17</td><td>POST /api/print</td><td class="warn">503 · 打印机离线</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <div class="note"><b>适合</b>一台电脑接打印机，其他电脑 / 手机 / 业务系统通过局域网调用。</div>
+    <div class="note"><b>亮点</b>状态、调用记录、接口说明都在眼前，出问题马上能看到是谁、何时、为什么失败。</div>
+    <div class="note"><b>代价</b>偏"管理后台"，给一线员工日常用略显复杂 —— 可与方案 B 搭配。</div>
+  </div>
+</section>
+
+<!-- ================= 方案 E ================= -->
+<section class="design" id="sec-E">
+  <div class="dhead"><h2>方案 E · 迷你窗 + 悬浮条 + 托盘</h2><p>平时缩成桌面角落的小窗 / 悬浮条，不占地方；后台常驻提供 API。</p></div>
+  <div class="win" id="E" data-design data-tpl="prod">
+    <div class="desk">
+      <div class="cw">
+        <div class="tb">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/></svg>
+          标签打印<span class="sp"></span>
+          <button class="pin" aria-label="窗口置顶：已开启"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3zM12 13v8"/></svg></button>
+          <button aria-label="收起为悬浮条"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <button aria-label="关闭到托盘"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div class="cbody">
+          <div class="statusline"><span><span class="on-dot"></span>HM-T260L 在线 · USB</span><span>API :8765 运行中</span></div>
+          <div class="seg"><button data-size="25x15">25×15</button><button data-size="30x20">30×20</button><button data-size="40x30">40×30</button><button data-size="50x30">50×30</button><button data-size="custom">自定义</button></div>
+          <label class="sr" for="e-tpl">模板</label>
+          <select id="e-tpl" data-tplselect><option value="prod">生产日期标签</option><option value="price">商品价签</option><option value="loc">库位标签</option><option value="asset">资产标签</option><option value="ship">快递分拣</option></select>
+          <div class="stage"><div data-label="print" data-fit="330x160"></div></div>
+          <div class="fields" data-fields></div>
+          <div class="row"><span class="stepper"><button data-dec aria-label="减少份数">−</button><span data-copies></span><button data-inc aria-label="增加份数">+</button></span><button class="go" data-print><span data-printlabel></span></button></div>
+        </div>
+      </div>
+      <div class="side">
+        <div>
+          <div class="cap">收起后：悬浮条（可拖到屏幕任意位置）</div>
+          <div class="fbar"><span class="nm" data-tplname></span><span class="ln" data-firstline></span><button class="go2" data-print>再打一张</button></div>
+        </div>
+        <div>
+          <div class="cap">关闭后：托盘右键菜单</div>
+          <div class="tray" role="menu" aria-label="托盘菜单">
+            <button role="menuitem">按上次内容再打一张<kbd>Ctrl+Alt+P</kbd></button>
+            <button role="menuitem">打开迷你窗</button>
+            <button role="menuitem">打开完整编辑器</button>
+            <hr>
+            <button role="menuitem"><span class="st"><span class="on-dot"></span>打印机在线</span><kbd>USB</kbd></button>
+            <button role="menuitem">API 服务：运行中<kbd>暂停</kbd></button>
+            <hr>
+            <button role="menuitem">退出</button>
+          </div>
+        </div>
+        <div class="explain">全局快捷键 <b>Ctrl+Alt+P</b>：在任何软件里都能按上次内容补打一张（流水号自动 +1）。迷你窗可"置顶"，配合扫码枪边扫边打。</div>
+      </div>
+    </div>
+  </div>
+  <div class="notes">
+    <div class="note"><b>适合</b>电脑主要做别的事，偶尔打标签；或作为后台常驻的 API 服务。</div>
+    <div class="note"><b>亮点</b>几乎不占屏幕；托盘常驻、开机自启，局域网随时可调用。</div>
+    <div class="note"><b>代价</b>只能快速打印，复杂设计要打开"完整编辑器"（可用方案 A）。</div>
+  </div>
+</section>
+
+<!-- ================= 共同能力 ================= -->
+<section class="common" id="sec-common">
+  <h2>5 套方案共同的能力</h2>
+  <div class="cgrid">
+    <div class="cbox">
+      <h3>文本参数（变量）写法</h3>
+      <table><thead><tr><th>模板里写</th><th>打印时变成（今天实算）</th></tr></thead><tbody data-syntax></tbody></table>
+    </div>
+    <div class="cbox">
+      <h3>局域网 API（草案）</h3>
+      <table><tbody>
+        <tr><td><span class="m2 get">GET</span><code>/api/status</code></td><td>打印机是否在线、走 USB 还是蓝牙</td></tr>
+        <tr><td><span class="m2 get">GET</span><code>/api/presets</code></td><td>尺寸预设列表</td></tr>
+        <tr><td><span class="m2 get">GET</span><code>/api/templates</code></td><td>模板列表 + 每个模板需要填的变量</td></tr>
+        <tr><td><span class="m2 post">POST</span><code>/api/print</code></td><td>按模板打印：<code>{"template","fields","copies"}</code></td></tr>
+        <tr><td><span class="m2 post">POST</span><code>/api/print/text</code></td><td>不用模板，直接传几行文字 + 尺寸</td></tr>
+        <tr><td><span class="m2 get">GET</span><code>/api/preview</code></td><td>返回标签预览 PNG，打印前先看</td></tr>
+      </tbody></table>
+      <p style="margin:8px 0 0;font-size:13px;color:#4A5563">默认只允许本机；在设置里打开"局域网访问"后需带令牌调用。</p>
+    </div>
+    <div class="cbox">
+      <h3>其余共同点</h3>
+      <ul>
+        <li>尺寸预设一键切换，默认 25×15，可自定义并保存</li>
+        <li>模板 = 尺寸 + 版式 + 带变量的文字/二维码，存成文件，可复制、导入导出</li>
+        <li>打印机在线状态每 2 秒刷新（USB），打印前自动唤醒</li>
+        <li>流水号按模板分别记录，打印成功才递增</li>
+        <li>Excel / CSV 批量：表头对上变量名就自动填</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const QR_SVG = '<svg viewBox="0 0 21 21" fill="currentColor" fill-rule="evenodd" shape-rendering="crispEdges" aria-hidden="true"><path d="M0 0h7v7H0zM1 1h5v5H1zM2 2h3v3H2zM14 0h7v7h-7zM15 1h5v5h-5zM16 2h3v3h-3zM0 14h7v7H0zM1 15h5v5H1zM2 16h3v3H2zM9 0h1v1H9zM11 1h2v1h-2zM8 2h1v2H8zM10 3h1v1h-1zM12 4h1v2h-1zM9 5h2v1H9zM8 8h2v1H8zM11 8h1v2h-1zM13 8h3v1h-3zM17 8h1v1h-1zM19 8h2v1h-2zM0 9h2v1H0zM4 9h2v1H4zM9 10h1v1H9zM14 10h2v2h-2zM18 10h1v2h-1zM2 11h1v1H2zM6 11h1v2H6zM10 12h3v1h-3zM16 12h1v1h-1zM20 12h1v2h-1zM8 14h1v2H8zM11 14h1v1h-1zM13 14h2v1h-2zM17 14h2v1h-2zM9 16h2v1H9zM14 16h1v2h-1zM16 16h1v1h-1zM19 16h2v1h-2zM8 18h2v1H8zM11 18h2v1h-2zM17 18h1v2h-1zM9 20h1v1H9zM12 20h3v1h-3zM19 19h2v2h-2z"/></svg>';
+
+const TPL = {
+  prod:  {name: '生产日期标签', size: '25x15', lines: ['{品名}', '生产 {日期}', '批号 {流水号}'], fields: {'品名': '不锈钢螺丝'}, serial: 24},
+  price: {name: '商品价签', size: '25x15', lines: ['{品名}', '¥ {价格}'], fields: {'品名': '螺丝 M6×20', '价格': '0.35'}},
+  loc:   {name: '库位标签', size: '30x20', lines: ['{库位}', '{区域}'], qr: '{库位}', fields: {'库位': 'A-03-02', '区域': '一号仓'}},
+  asset: {name: '资产标签', size: '40x30', lines: ['固定资产', '{资产名称}', '编号 ZC-{流水号}', '启用 {日期}'], fields: {'资产名称': '激光打印机'}, serial: 107},
+  ship:  {name: '快递分拣', size: '50x30', lines: ['{格口}', '{快递公司}', '{日期} {时间}'], fields: {'格口': 'B-12', '快递公司': '顺丰'}},
+};
+const SIZES = ['25x15', '30x20', '40x30', '50x30'];
+const NOW = new Date();
+const FONT = '"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Noto Sans SC",sans-serif';
+
+const pad2 = n => String(n).padStart(2, '0');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const fmtDate = (d, f) => f.replace('yyyy', d.getFullYear()).replace('MM', pad2(d.getMonth() + 1)).replace('dd', pad2(d.getDate()));
+const fmtTime = (d, f) => f.replace('HH', pad2(d.getHours())).replace('mm', pad2(d.getMinutes())).replace('ss', pad2(d.getSeconds()));
+const isAuto = h => /^日期([+-]\d+天)?$/.test(h) || h === '时间' || h === '流水号';
+
+function parseVar(body) {
+  const i = body.indexOf(':');
+  return i < 0 ? [body.trim(), ''] : [body.slice(0, i).trim(), body.slice(i + 1)];
+}
+
+// 模板文字 → 打印时的实际文字
+function expand(text, st) {
+  return text.replace(/\{([^{}]+)\}/g, (m, body) => {
+    let [h, f] = parseVar(body);
+    const mo = h.match(/^日期([+-]\d+)天$/);
+    if (h === '日期' || mo) {
+      const d = new Date(NOW);
+      if (mo) d.setDate(d.getDate() + Number(mo[1]));
+      return fmtDate(d, f || 'yyyy-MM-dd');
+    }
+    if (h === '时间') return fmtTime(NOW, f || 'HH:mm');
+    if (h === '流水号') return String(st.serial).padStart(f ? f.length : 4, '0');
+    if (h === '输入') h = f;
+    const v = st.fields[h];
+    return v === undefined || v === '' ? m : v;
+  });
+}
+
+// 模板里出现的变量: 自动的(日期/时间/流水号) 和 需要人填的
+function varsOf(tpl) {
+  const out = [];
+  [...tpl.lines, tpl.qr || ''].join(' ').replace(/\{([^{}]+)\}/g, (m, body) => {
+    let [h, f] = parseVar(body);
+    if (h === '输入') h = f;
+    if (isAuto(h)) { if (!out.some(v => v.auto && v.raw === m)) out.push({auto: true, raw: m, name: h}); }
+    else if (h && !out.some(v => !v.auto && v.name === h)) out.push({auto: false, name: h});
+    return m;
+  });
+  return out;
+}
+
+const mctx = document.createElement('canvas').getContext('2d');
+function textW(t, px, bold) { mctx.font = `${bold ? 700 : 400} ${px}px ${FONT}`; return mctx.measureText(t).width; }
+const tokenize = t => esc(t).replace(/\{[^{}]+\}/g, m => `<span class="tok">${m}</span>`);
+
+// 画标签: mode = edit(显示变量) / print(替换成实际值)
+function renderLabel(el, st, mode) {
+  const [wm, hm] = st.size.split('x').map(Number);
+  let k = Number(el.dataset.scale || 10);
+  if (el.dataset.fit) { const [fw, fh] = el.dataset.fit.split('x').map(Number); k = Math.min(fw / wm, fh / hm); }
+  const W0 = wm * k, H0 = hm * k;
+  el.className = 'label';
+  el.style.width = W0 + 'px'; el.style.height = H0 + 'px';
+  const pad = Math.max(2, k * 1.1);
+  let x = pad, W = W0 - 2 * pad;
+  const H = H0 - 2 * pad;
+  let html = '';
+  if (st.tpl.qr) {
+    const side = Math.min(H, W * 0.5);
+    html += `<div class="lbl-qr" style="left:${pad}px;top:${(H0 - side) / 2}px;width:${side}px;height:${side}px">${QR_SVG}</div>`;
+    x += side + k; W -= side + k;
+  }
+  const lines = st.tpl.lines.map(t => mode === 'print' ? expand(t, st) : t);
+  const n = lines.length, r = i => (i === 0 && n > 1) ? 1.25 : 1;
+  const units = lines.reduce((a, _, i) => a + r(i), 0);
+  const s = H / units / 1.2;
+  html += `<div class="lbl-lines" style="left:${x}px;top:${pad}px;width:${W}px;height:${H}px">`;
+  lines.forEach((t, i) => {
+    const bold = i === 0;
+    let fs = s * r(i);
+    const w = textW(t, fs, bold) * (mode === 'edit' ? 1.06 : 1);
+    if (w > W) fs *= W / w;
+    const sel = mode === 'edit' && st.sel === i ? ' sel' : '';
+    html += `<div class="lbl-line${sel}" data-line="${i}" style="font-size:${Math.max(fs, 3).toFixed(1)}px;font-weight:${bold ? 700 : 400}">${mode === 'edit' ? tokenize(t) : esc(t)}</div>`;
+  });
+  el.innerHTML = html + '</div>';
+}
+
+function stateOf(key) {
+  const t = TPL[key];
+  return {tplKey: key, tpl: {...t, lines: [...t.lines]}, size: t.size, fields: {...t.fields}, serial: t.serial || 1, sel: Math.min(1, t.lines.length - 1), copies: 1};
+}
+
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+class Design {
+  constructor(root) {
+    this.root = root;
+    this.st = stateOf(root.dataset.tpl || 'prod');
+    root.addEventListener('click', e => this.click(e));
+    root.addEventListener('input', e => this.input(e));
+    root.addEventListener('change', e => this.change(e));
+    root.addEventListener('focusin', e => this.focus(e));
+    if ('enterprint' in root.dataset) root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-field]')) this.print(); });
+    this.render();
+  }
+  q(s) { return this.root.querySelectorAll(s); }
+  setTpl(key) { const copies = this.st.copies; this.st = stateOf(key); this.st.copies = copies; }
+  click(e) {
+    const b = e.target.closest('[data-size],[data-tpl],[data-insert],[data-dec],[data-inc],[data-print],.lbl-line,[data-addline],[data-delline],[data-layout]');
+    if (!b || !this.root.contains(b)) return;
+    const d = b.dataset, st = this.st;
+    if (d.size) {
+      let s = d.size;
+      if (s === 'custom') {
+        s = (prompt('自定义尺寸（宽x高，单位 mm）', '35x25') || '').trim().toLowerCase().replace('×', 'x').replace('*', 'x');
+        if (!/^\d+(\.\d+)?x\d+(\.\d+)?$/.test(s)) return;
+      }
+      st.size = s;
+    } else if (d.tpl) this.setTpl(d.tpl);
+    else if (d.insert) { this.insert(d.insert); return; }
+    else if ('dec' in d) st.copies = Math.max(1, st.copies - 1);
+    else if ('inc' in d) st.copies = Math.min(999, st.copies + 1);
+    else if ('print' in d) { this.print(); return; }
+    else if (b.classList.contains('lbl-line')) st.sel = Number(d.line);
+    else if ('addline' in d) { st.tpl.lines.push('新的一行'); st.sel = st.tpl.lines.length - 1; }
+    else if ('delline' in d) {
+      if (st.tpl.lines.length > 1) { st.tpl.lines.splice(Number(d.delline), 1); st.sel = Math.min(st.sel, st.tpl.lines.length - 1); }
+    } else if (d.layout) {
+      const first = varsOf(st.tpl).find(v => !v.auto);
+      st.tpl.qr = d.layout === 'qr' ? (st.tpl.qr || `{${first ? first.name : '品名'}}`) : null;
+    }
+    this.render();
+  }
+  focus(e) {
+    const t = e.target;
+    if (t.matches('[data-content],[data-lineinput]')) this.lastFocus = t;
+    if (t.dataset.lineinput !== undefined && this.st.sel !== Number(t.dataset.lineinput)) {
+      this.st.sel = Number(t.dataset.lineinput); this.render({keepLines: true});
+    }
+  }
+  input(e) {
+    const t = e.target, st = this.st;
+    if (t.dataset.field !== undefined) { st.fields[t.dataset.field] = t.value; this.render({keepFields: true}); }
+    else if (t.hasAttribute('data-content')) { st.tpl.lines[st.sel] = t.value; this.render({keepContent: true}); }
+    else if (t.dataset.lineinput !== undefined) { const i = Number(t.dataset.lineinput); st.tpl.lines[i] = t.value; st.sel = i; this.render({keepLines: true}); }
+  }
+  change(e) { if (e.target.hasAttribute('data-tplselect')) { this.setTpl(e.target.value); this.render(); } }
+  insert(tok) {
+    let el = this.lastFocus && this.root.contains(this.lastFocus) ? this.lastFocus : this.root.querySelector('[data-content],[data-lineinput]');
+    if (!el) { this.st.tpl.lines[this.st.sel] += tok; this.render(); return; }
+    const a = el.selectionStart ?? el.value.length, z = el.selectionEnd ?? a;
+    el.value = el.value.slice(0, a) + tok + el.value.slice(z);
+    el.dispatchEvent(new Event('input', {bubbles: true}));
+    el.focus(); el.setSelectionRange(a + tok.length, a + tok.length);
+  }
+  print() {
+    const st = this.st, n = st.copies;
+    const usesSerial = [...st.tpl.lines, st.tpl.qr || ''].some(t => t.includes('{流水号'));
+    toast(`演示：已发送 ${n} 张「${st.tpl.name}」到 HM-T260L（${expand(st.tpl.lines[0], st)}）`);
+    if (usesSerial) st.serial += n;
+    const log = this.root.querySelector('[data-log]');
+    if (log) { const t = new Date(); log.insertAdjacentHTML('afterbegin', `<tr><td>${fmtTime(t, 'HH:mm:ss')}</td><td>本机界面</td><td>POST /api/print</td><td class="good">200 · ${n} 张</td></tr>`); }
+    const c = this.root.querySelector('[data-count]');
+    if (c) c.textContent = Number(c.textContent) + n;
+    this.render();
+  }
+  render(o = {}) {
+    const st = this.st, [wm, hm] = st.size.split('x');
+    this.q('[data-size]').forEach(b => b.classList.toggle('on', b.dataset.size === st.size || (b.dataset.size === 'custom' && !SIZES.includes(st.size))));
+    this.q('[data-tpl]').forEach(b => b.classList.toggle('on', b.dataset.tpl === st.tplKey));
+    this.q('[data-layout]').forEach(b => b.classList.toggle('on', (b.dataset.layout === 'qr') === !!st.tpl.qr));
+    this.q('[data-tplselect]').forEach(s => s.value = st.tplKey);
+    this.q('[data-label]').forEach(el => renderLabel(el, st, el.dataset.label));
+    this.q('[data-sizename]').forEach(el => el.textContent = `${wm} × ${hm} mm`);
+    this.q('[data-tplname]').forEach(el => el.textContent = st.tpl.name);
+    this.q('[data-copies]').forEach(el => el.textContent = st.copies);
+    this.q('[data-printlabel]').forEach(el => el.textContent = `打印 ${st.copies} 张`);
+    this.q('[data-converted]').forEach(el => el.textContent = expand(st.tpl.lines[st.sel] ?? '', st));
+    this.q('[data-firstline]').forEach(el => el.textContent = st.tpl.lines.map(t => expand(t, st)).join(' · '));
+    this.q('[data-serial]').forEach(el => el.textContent = String(st.serial).padStart(4, '0'));
+    if (!o.keepContent) this.q('[data-content]').forEach(el => el.value = st.tpl.lines[st.sel] ?? '');
+    const vars = varsOf(st.tpl);
+    if (!o.keepFields) this.q('[data-fields]').forEach(c => {
+      c.innerHTML = vars.map(v => v.auto
+        ? `<div class="fld auto"><span class="fld-k">${esc(v.raw)}</span><span class="fld-v">${esc(expand(v.raw, st))}<em>自动</em></span></div>`
+        : `<label class="fld"><span class="fld-k">${esc(v.name)}</span><input data-field="${esc(v.name)}" value="${esc(st.fields[v.name] ?? '')}" placeholder="打印时填写"></label>`).join('')
+        || '<div style="font-size:13px;color:#5A6573">这个模板没有变量，直接打印即可</div>';
+    });
+    this.q('[data-vartable]').forEach(t => {
+      t.innerHTML = vars.map(v => `<tr><td>${esc(v.auto ? v.raw : '{' + v.name + '}')}</td><td>${esc(v.auto ? expand(v.raw, st) : (st.fields[v.name] || '（待填写）'))}</td></tr>`).join('');
+    });
+    if (!o.keepLines) this.q('[data-lineeditor]').forEach(c => {
+      c.innerHTML = st.tpl.lines.map((t, i) => `<div class="le-row"><span class="le-n">${i + 1}</span><input data-lineinput="${i}" value="${esc(t)}" aria-label="第 ${i + 1} 行"><button class="le-del" data-delline="${i}" aria-label="删除第 ${i + 1} 行">×</button></div>`).join('')
+        + '<button class="le-add" data-addline>+ 加一行</button>';
+    });
+    this.q('.le-row').forEach((r, i) => r.classList.toggle('on', i === st.sel));
+  }
+}
+
+document.querySelectorAll('[data-mini]').forEach(el => renderLabel(el, stateOf(el.dataset.mini), 'print'));
+document.querySelectorAll('[data-design]').forEach(r => new Design(r));
+
+// 变量写法表 (用今天的日期实算)
+const demo = {fields: {'品名': '不锈钢螺丝', '备注': '易碎'}, serial: 24};
+document.querySelector('[data-syntax]').innerHTML = [
+  ['{日期}', ''], ['{日期:yyyy年MM月dd日}', ''], ['{日期+30天}', '保质期 / 到期日'], ['{时间}', ''],
+  ['{流水号}', '每打一张 +1'], ['{流水号:000000}', '按 0 的个数补位'], ['{品名}', '打印时填写 / 表格导入'], ['{输入:备注}', '打印时弹出输入框'],
+].map(([t, note]) => `<tr><td><code>${esc(t)}</code></td><td>${esc(expand(t, demo))}${note ? `<span style="color:#5A6573"> · ${esc(note)}</span>` : ''}</td></tr>`).join('');
+</script>
+</body>
+</html>

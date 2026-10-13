@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>汉印标签打印</title>
+<link rel="icon" href="favicon.ico">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+<header class="hdr">
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F5FBF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+    汉印标签打印 <span class="model">HM-T260L</span>
+  </div>
+  <nav class="ttabs" role="tablist" aria-label="功能">
+    <a class="ttab" role="tab" href="#design" data-view="design" title="标签设计"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9z"/></svg><span class="tl">标签设计</span></a>
+    <a class="ttab" role="tab" href="#printer" data-view="printer" title="打印机校准"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span class="tl">打印机校准</span></a>
+    <a class="ttab" role="tab" href="#settings" data-view="settings" title="设置"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">设置</span></a>
+    <a class="ttab" role="tab" href="#api/service" data-view="api" title="API 与密钥"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M13 6l-2 12"/></svg><span class="tl">API 与密钥</span></a>
+  </nav>
+  <span class="sp"></span>
+  <div class="conn" role="group" aria-label="打印机连接方式">
+    <span class="muted conn-k">连接方式</span>
+    <span class="seg conn-seg">
+      <button data-conn="auto" aria-pressed="false" title="USB 线连接"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13M9 6l3-3 3 3M7 10v2a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-2"/><circle cx="12" cy="19" r="2"/></svg>USB</button>
+      <button data-conn="bt" aria-pressed="false" title="蓝牙连接 (COM5)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></svg>蓝牙</button>
+    </span>
+    <button class="pill" id="pill-printer" title="点击重新检测"><span class="dot"></span><span>检测打印机…</span></button>
+  </div>
+  <span class="pill" id="pill-lan"><span class="dot"></span><span>API</span></span>
+</header>
+
+<!-- ======================= 标签设计 ======================= -->
+<section class="view" id="view-design" data-view="design" hidden>
+  <div class="dbar">
+    <button class="ghost" id="btn-new" title="新建模板"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="tl">新建模板</span></button>
+    <button class="ghost" id="btn-save" title="保存 (Ctrl+S)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v5h7V3M8 21v-7h8v7"/></svg><span class="tl">保存</span> <kbd class="tl-long">Ctrl+S</kbd></button>
+    <button class="ghost" id="btn-saveas" title="另存为"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">另存为</span></button>
+    <button class="ghost" id="btn-deltpl" title="删除模板"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span class="tl">删除模板</span></button>
+    <button class="ghost" id="btn-batch" title="导入表格 (CSV) 批量打印"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 10h18M9 4v16"/></svg><span class="tl">导入表格批量打印</span></button>
+    <input type="file" id="file-batch" accept=".csv,.txt" hidden>
+    <span class="vsep"></span>
+    <span class="muted hide-narrow">标签尺寸</span>
+    <span id="size-chips" style="display:contents"></span>
+    <button class="chip dash" id="btn-custom-size">+ 自定义</button>
+    <span class="sp"></span>
+    <span class="muted hide-narrow">间隙标签 · 203 dpi · 靠左进纸</span>
+  </div>
+
+  <div class="dbody">
+    <aside class="side" aria-label="模板列表">
+      <div class="side-head"><h3>标签模板</h3><button class="chip sm" id="btn-new2">+ 新建</button></div>
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A6573" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <label class="sr" for="tpl-search">搜索模板</label><input id="tpl-search" placeholder="搜索模板">
+      </div>
+      <div class="tpl-list" id="tpl-list"></div>
+    </aside>
+
+    <main class="center">
+      <div class="tools" role="toolbar" aria-label="编辑标签">
+        <button class="tool" id="t-text" title="添加文本"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6V4h16v2M12 4v16M9 20h6"/></svg><span class="tl">文本</span></button>
+        <button class="tool" id="t-qr" title="添加二维码"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/></svg><span class="tl">二维码</span></button>
+        <button class="tool" id="t-line" title="添加线条"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12h16"/></svg><span class="tl">线条</span></button>
+        <button class="tool" id="t-box" title="添加方框"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="6" width="16" height="12"/></svg><span class="tl">方框</span></button>
+        <span class="tsep"></span>
+        <button class="tool" id="t-dup" title="复制选中元素 (Ctrl+D)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 16V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">复制</span></button>
+        <button class="tool" id="t-del" title="删除选中元素 (Delete)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg><span class="tl">删除</span></button>
+        <span class="tsep"></span>
+        <button class="tool icon" id="t-undo" aria-label="撤销 (Ctrl+Z)" title="撤销 (Ctrl+Z)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+        <button class="tool icon" id="t-redo" aria-label="重做 (Ctrl+Y)" title="重做 (Ctrl+Y)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+        <span class="tsep"></span>
+        <button class="tool" id="t-ch" title="在标签上左右居中"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M7 8h10v8H7z"/></svg><span class="tl">左右居中</span></button>
+        <button class="tool" id="t-cv" title="在标签上上下居中"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M8 7h8v10H8z"/></svg><span class="tl">上下居中</span></button>
+        <span class="sp"></span>
+        <span class="muted" id="size-name"></span>
+      </div>
+      <div class="stage" id="stage">
+        <div class="backing"><div id="canvas" class="canvas"></div></div>
+        <div class="caption">拖中间移动 · 拖四角 / 四边的小方块改大小（文本拖上下边改字号）· <kbd>Del</kbd> 删除 · 方向键微调 0.5mm（<kbd>Shift</kbd> 2mm，<kbd>Alt</kbd> 0.1mm）· <kbd>Ctrl+Z</kbd> 撤销<br>画布显示的就是打印效果：蓝底部分是变量替换后的内容</div>
+      </div>
+    </main>
+
+    <aside class="props" aria-label="属性">
+      <div class="pbody">
+        <div class="psec">
+          <div class="sec-title">模板</div>
+          <label class="lbl"><span>模板名称</span><input class="txt" id="f-name" maxlength="40"></label>
+        </div>
+        <div class="psec" id="el-props"></div>
+        <div class="psec">
+          <div class="sec-title">本次内容</div>
+          <div class="fields" id="fields"></div>
+        </div>
+        <div class="psec">
+          <div class="sec-title">实际打印效果（203 dpi 位图）</div>
+          <div class="real" id="real"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <span class="muted" id="foot-info"></span>
+    <span class="sp"></span>
+    <span class="offline-tip" id="offline-tip" hidden></span>
+    <span>份数</span>
+    <span class="stepper"><button id="c-dec" aria-label="减少份数">−</button><label class="sr" for="copies">份数</label><input id="copies" type="number" min="1" max="500" value="1"><button id="c-inc" aria-label="增加份数">+</button></span>
+    <button class="primary" id="btn-print"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/></svg><span id="print-label">打印</span></button>
+  </footer>
+</section>
+
+<!-- ======================= 打印机校准 (调试模式) ======================= -->
+<section class="view" id="view-printer" data-view="printer" hidden>
+  <div class="ascroll">
+    <div class="apanel">
+
+      <div class="card">
+        <h2>① 先把纸放正</h2>
+        <div class="steps-row">
+          <ol class="paper-steps">
+            <li>打开上盖，把纸仓里的<b>挡纸片推到贴住纸卷两侧</b>，让纸卷左右不能晃（25mm 窄标签最容易跑偏）。</li>
+            <li>纸头从出纸口<b>拉直</b>拉出一点，确认纸边和机身平行，不要斜着。</li>
+            <li>合上盖子，点下面的「走纸到下一张」，打印机会停在一张标签的开头。</li>
+          </ol>
+          <div class="btn-col">
+            <button class="secondary" id="pr-feed">走纸到下一张</button>
+            <span class="muted">歪斜只能靠放正纸解决，软件补不了</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>② 打印位置校准</h2>
+        <p class="muted">打一张带四条边线的校准标签，看哪条边线缺了就往反方向调。保存后，界面打印和 API 打印都会自动按这个偏移输出。</p>
+        <div class="calib">
+          <div class="calib-ctl">
+            <label class="lbl"><span>标签尺寸</span><select id="cal-size"></select></label>
+            <div class="lbl"><span>左右偏移 X（正数往右，负数往左）</span>
+              <span class="offset-row"><button class="secondary" data-nudge="x:-1" aria-label="往左">◀ 往左</button><span class="nf"><span class="box"><input type="number" step="0.1" id="cal-x" aria-label="X 偏移"><em>mm</em></span></span><button class="secondary" data-nudge="x:1" aria-label="往右">往右 ▶</button></span>
+            </div>
+            <div class="lbl"><span>上下偏移 Y（正数往下，负数往上）</span>
+              <span class="offset-row"><button class="secondary" data-nudge="y:-1" aria-label="往上">▲ 往上</button><span class="nf"><span class="box"><input type="number" step="0.1" id="cal-y" aria-label="Y 偏移"><em>mm</em></span></span><button class="secondary" data-nudge="y:1" aria-label="往下">往下 ▼</button></span>
+            </div>
+            <div class="lbl"><span>每次调多少</span>
+              <span class="seg" role="group" aria-label="步长"><button data-step="0.1">0.1mm</button><button data-step="0.5" class="on">0.5mm</button><button data-step="1">1mm</button></span>
+            </div>
+            <div class="muted">打印用右上角选的连接方式（USB / 蓝牙）</div>
+            <div class="row">
+              <button class="primary" id="cal-print">打印校准标签</button>
+              <button class="secondary" id="cal-save">保存为默认偏移</button>
+              <button class="secondary" id="cal-reset">恢复已保存的值</button>
+            </div>
+            <div class="muted" id="cal-saved"></div>
+          </div>
+          <div class="calib-view">
+            <div class="real calib-img"><img id="cal-img" alt="校准标签预览（按当前偏移）"></div>
+            <div class="muted" style="text-align:center">预览：浅色底是标签纸，按当前偏移打印会落在这里</div>
+            <table class="tbl calib-guide">
+              <thead><tr><th>打印出来看到</th><th>怎么调</th></tr></thead>
+              <tbody>
+                <tr><td>左边线没有 / 左边被切</td><td>点「往右 ▶」</td></tr>
+                <tr><td>右边线没有 / 右边被切</td><td>点「◀ 往左」</td></tr>
+                <tr><td>上边线没有 / 上面被切</td><td>点「往下 ▼」</td></tr>
+                <tr><td>下边线没有 / 下面被切</td><td>点「▲ 往上」</td></tr>
+                <tr><td>四条边线都在、离边距离差不多</td><td>点「保存为默认偏移」，完成</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>③ 打印机参数 <span class="muted" style="font-weight:400">（经蓝牙读写打印机自身设置）</span></h2>
+        <p class="muted">需要打印机开着、蓝牙没被手机连着。读一次大约 10 秒。</p>
+        <div class="row" style="margin-bottom:14px">
+          <button class="secondary" id="pp-read">读取打印机参数</button>
+          <button class="secondary" id="pp-learn" disabled title="换新卷纸后点一次">纸张学习</button>
+          <span class="muted" id="pp-msg"></span>
+        </div>
+        <div class="kv" id="pp-form" hidden>
+          <span>型号</span><span id="pp-model"></span>
+          <span>纸张类型</span><span><label class="sr" for="pp-paper_type">纸张类型</label><select id="pp-paper_type" data-param="paper_type"></select></span>
+          <span>打印浓度</span><span><label class="sr" for="pp-density">打印浓度</label><select id="pp-density" data-param="density"></select> <span class="muted">字发虚就调浓，糊成一团就调淡</span></span>
+          <span>休眠等待</span><span><label class="sr" for="pp-sleep_sec">休眠等待</label><select id="pp-sleep_sec" data-param="sleep_sec"></select></span>
+          <span>自动关机</span><span><label class="sr" for="pp-poweroff_min">自动关机</label><select id="pp-poweroff_min" data-param="poweroff_min"></select> <span class="muted">关机后 USB 会断开，需要按电源键开机</span></span>
+          <span></span><span><button class="primary" id="pp-save">保存到打印机</button></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 设置 ======================= -->
+<section class="view" id="view-settings" data-view="settings" hidden>
+  <div class="ascroll">
+    <div class="apanel">
+
+      <div class="card">
+        <h2>启动与运行</h2>
+        <div class="switch-row">
+          <button class="switch" id="auto-switch" role="switch" aria-checked="false" aria-labelledby="auto-title"></button>
+          <div>
+            <b id="auto-title">开机自动启动</b>
+            <p>开机后自动在右下角托盘运行（不弹窗口），局域网 API 随时可用。</p>
+          </div>
+        </div>
+        <p class="muted">关掉这个窗口后，程序会留在右下角托盘里继续运行：<b>左键点托盘图标</b>重新打开窗口，<b>右键托盘图标</b>可以开关开机启动、退出程序。</p>
+        <div class="row"><button class="secondary danger-btn" id="set-quit">退出程序</button><span class="muted">退出后打印和局域网 API 都会停止，再用桌面图标打开即可。</span></div>
+      </div>
+
+      <div class="card">
+        <h2>打印机连接</h2>
+        <div class="kv">
+          <span>连接方式</span>
+          <span class="seg conn-seg"><button data-conn="auto">USB</button><button data-conn="bt">蓝牙</button></span>
+          <span>USB 打印队列</span><span><code id="set-queue">…</code> <span class="muted" id="set-usb"></span></span>
+          <span>蓝牙串口</span>
+          <span class="row" style="align-items:center">
+            <label class="sr" for="set-bt-port">蓝牙串口</label>
+            <select id="set-bt-port"></select>
+            <button class="secondary" id="set-bt-save">保存并检测</button>
+            <button class="secondary" id="set-bt-refresh">刷新列表</button>
+          </span>
+          <span></span><span class="muted">打印机和电脑配对后，系统会生成蓝牙串口（「蓝牙链接上的标准串行」）。一般有两个，选编号小的那个；不确定就逐个「保存并检测」，显示可以连接的就是对的。</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>数据与版本</h2>
+        <div class="kv">
+          <span>版本</span><span id="set-version">…</span>
+          <span>程序位置</span><span><code id="set-app-dir">…</code></span>
+          <span>数据文件夹</span><span class="row" style="align-items:center"><code id="set-data-dir">…</code><button class="secondary" id="set-open-data">打开</button></span>
+          <span></span><span class="muted">模板、API 密钥、校准偏移等都在数据文件夹里；卸载程序不会删除。换电脑时把这个文件夹复制过去即可。</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ======================= API 与密钥 ======================= -->
+<section class="view" id="view-api" data-view="api" hidden>
+  <nav class="subtabs" role="tablist" aria-label="API 与密钥">
+    <a class="stab" role="tab" href="#api/service" data-sub="service">服务设置</a>
+    <a class="stab" role="tab" href="#api/keys" data-sub="keys">密钥管理</a>
+    <a class="stab" role="tab" href="#api/calls" data-sub="calls">调用记录</a>
+    <a class="stab" role="tab" href="#api/docs" data-sub="docs">接口文档</a>
+  </nav>
+  <div class="ascroll" id="ascroll">
+
+    <div class="apanel" data-sub="service" hidden>
+      <div class="card">
+        <h2>服务设置</h2>
+        <div class="switch-row">
+          <button class="switch" id="lan-switch" role="switch" aria-checked="false" aria-labelledby="lan-title"></button>
+          <div>
+            <b id="lan-title">允许局域网访问</b>
+            <p>关闭时只有这台电脑能用。开启后，同一局域网的电脑、手机、业务系统可以<b>带密钥</b>调用 API。<br>
+            第一次开启时 Windows 防火墙可能会弹窗询问，请选择「允许」（专用网络）。</p>
+          </div>
+        </div>
+        <div class="kv">
+          <span>本机地址</span><span class="addr"><code id="addr-local">…</code><button class="copy" data-copy-from="#addr-local">复制</button></span>
+          <span>局域网地址</span><span id="addr-lan" class="addr">…</span>
+          <span>打印连接</span><span class="muted">用右上角选的 USB / 蓝牙；API 调用没指定 channel 时也用它。打印机没连上会直接拒绝打印。</span>
+          <span>服务</span><span><span id="ver">…</span> · 数据在程序目录的 data 文件夹 · <button class="danger-link" id="btn-stop">停止服务</button></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="apanel" data-sub="keys" hidden>
+      <div class="card">
+        <h2>密钥管理</h2>
+        <p class="muted">局域网设备和其他程序调用 API 都要带密钥。密钥<b>只在生成时完整显示一次</b>，系统里只保存它的指纹；丢了就撤销后重新生成。建议每个调用方（比如"仓库扫码枪""ERP 系统"）各用一个，方便单独撤销和查看调用记录。</p>
+        <form class="key-form" id="key-form">
+          <label class="sr" for="key-name">密钥名称</label>
+          <input class="txt" id="key-name" maxlength="40" placeholder="给密钥起个名字，例如：仓库扫码枪 / ERP 系统">
+          <button class="primary" type="submit">生成新密钥</button>
+        </form>
+        <div class="tblbox"><table class="tbl">
+          <thead><tr><th>名称</th><th>密钥</th><th>创建时间</th><th>最近使用</th><th>调用次数</th><th></th></tr></thead>
+          <tbody id="key-rows"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="apanel" data-sub="calls" hidden>
+      <div class="card">
+        <h2>调用记录</h2>
+        <p class="muted">记录带密钥的调用、被拒绝的调用，以及所有打印请求（最近 200 条，重启服务后清空）。停留在这一页时每 5 秒自动刷新。</p>
+        <div class="tblbox"><table class="tbl">
+          <thead><tr><th>时间</th><th>来源 IP</th><th>调用方</th><th>接口</th><th>结果</th></tr></thead>
+          <tbody id="call-rows"><tr><td colspan="5" class="empty">暂无调用</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="apanel" data-sub="docs" hidden>
+      <div class="card">
+        <h2>接口文档</h2>
+        <div class="docs-wrap">
+          <nav class="dtoc" aria-label="文档目录">
+            <button data-goto="d-start">快速开始</button>
+            <button data-goto="d-auth">鉴权</button>
+            <button data-goto="d-format">请求与响应</button>
+            <button data-goto="d-endpoints">接口列表</button>
+            <button data-goto="d-vars">变量写法</button>
+            <button data-goto="d-errors">错误码</button>
+            <button data-goto="d-code">代码示例</button>
+            <button data-goto="d-try">在线试一试</button>
+          </nav>
+          <div class="docs">
+            <p>标签打印服务提供一组 HTTP + JSON 接口：查状态、查模板、按模板打印、直接打印文字、生成预览图。本程序界面用的也是这套接口。</p>
+
+            <h3 id="d-start">快速开始</h3>
+            <ol>
+              <li>在「服务设置」打开<b>允许局域网访问</b>（只在本机调用可以不开）。</li>
+              <li>在「密钥管理」生成一个密钥，复制保存。</li>
+              <li>在「标签设计」做好模板（比如「生产日期标签」），需要每次填写的内容写成变量，如 <code>{品名}</code>。</li>
+              <li>调用 <code>POST /api/print</code>，传模板名、变量值和份数：</li>
+            </ol>
+            <pre class="code">curl -X POST <span class="base"></span>/api/print \
+  -H "Authorization: Bearer hm_你的密钥" \
+  -H "Content-Type: application/json" \
+  -d '{"template": "生产日期标签", "fields": {"品名": "不锈钢螺丝"}, "copies": 2}'</pre>
+            <p>返回 <code>{"ok": true, "printed": 2, "channel": "usb", "serial_next": 27}</code> 就表示已经发给打印机了。</p>
+
+            <h3 id="d-auth">鉴权</h3>
+            <p>除 <code>GET /api/ping</code> 外，所有接口都要在请求头里带密钥，两种写法任选：</p>
+            <pre class="code">Authorization: Bearer hm_你的密钥
+X-API-Key: hm_你的密钥</pre>
+            <ul>
+              <li>局域网访问关闭时，其他电脑连不上服务（只监听 127.0.0.1）；本机脚本带密钥仍可调用。</li>
+              <li>模板的新建/修改/删除、密钥管理、服务设置只能在本机的程序界面里操作；API 调用方只能读模板、预览和打印。</li>
+              <li>浏览器网页可以跨域调用（已开启 CORS），同样必须带密钥。</li>
+            </ul>
+
+            <h3 id="d-format">请求与响应</h3>
+            <ul>
+              <li>基础地址：<code><span class="base"></span></code>（局域网地址见「服务设置」）</li>
+              <li>请求体是 UTF-8 编码的 JSON，请求头 <code>Content-Type: application/json</code>。</li>
+              <li>成功：HTTP 200，<code>{"ok": true, ...}</code>；失败：对应的错误码，<code>{"ok": false, "error": "中文原因"}</code>。</li>
+              <li>模板可以用 id 或名称指定，如 <code>"prod"</code> 或 <code>"生产日期标签"</code>。</li>
+              <li><b>打印机没连上时打印接口直接返回 503，不会排队</b>，调用方可以据此提示用户。</li>
+            </ul>
+
+            <h3 id="d-endpoints">接口列表</h3>
+            <details class="ep" open>
+              <summary><span class="m post">POST</span><span class="path">/api/print</span><span class="desc">按模板打印（最常用）</span></summary>
+              <div class="epb">
+                <div class="tblbox"><table class="tbl">
+                  <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>template</code></td><td>字符串，必填</td><td>模板 id 或名称</td></tr>
+                    <tr><td><code>fields</code></td><td>对象</td><td>变量值，如 <code>{"品名": "不锈钢螺丝"}</code>；没传的用模板里保存的默认值，缺了返回 400</td></tr>
+                    <tr><td><code>copies</code></td><td>整数</td><td>份数，默认 1，一次最多 500</td></tr>
+                    <tr><td><code>rows</code></td><td>数组</td><td>批量：<code>[{"fields": {...}, "copies": 1}, ...]</code>，传了就忽略 fields / copies</td></tr>
+                    <tr><td><code>channel</code></td><td>字符串</td><td><code>auto</code>（=USB）/ <code>driver</code>（USB 经驱动）/ <code>bt</code>（蓝牙），默认用「服务设置」里的</td></tr>
+                  </tbody>
+                </table></div>
+                <p style="margin-top:10px">带 <code>{流水号}</code> 的模板每张单独编号，打印成功后服务端自动累加，下次接着打。</p>
+                <pre class="code">// 请求
+{"template": "生产日期标签", "fields": {"品名": "不锈钢螺丝"}, "copies": 2}
+
+// 批量请求
+{"template": "商品价签", "rows": [
+  {"fields": {"品名": "螺丝 M6×20", "价格": "0.35"}, "copies": 10},
+  {"fields": {"品名": "垫片 Φ6", "价格": "0.05"}, "copies": 20}
+]}
+
+// 成功
+{"ok": true, "printed": 2, "channel": "usb", "serial_next": 27}
+
+// 打印机没连上 (HTTP 503)
+{"ok": false, "error": "打印机未连接: USB 上没检测到打印机 (没插线、没开机或已自动关机)"}</pre>
+              </div>
+            </details>
+            <details class="ep">
+              <summary><span class="m post">POST</span><span class="path">/api/print/text</span><span class="desc">不用模板，直接打几行文字</span></summary>
+              <div class="epb">
+                <div class="tblbox"><table class="tbl">
+                  <thead><tr><th>参数</th><th>类型</th><th>说明</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>lines</code></td><td>字符串数组，必填</td><td>每个元素一行，自动排版；也可以写变量，如 <code>"生产 {日期}"</code></td></tr>
+                    <tr><td><code>size</code></td><td>[宽, 高]</td><td>单位 mm，默认 <code>[25, 15]</code></td></tr>
+                    <tr><td><code>qr</code></td><td>字符串</td><td>二维码内容，有就放在左边</td></tr>
+                    <tr><td><code>copies</code> / <code>channel</code></td><td></td><td>同上</td></tr>
+                  </tbody>
+                </table></div>
+                <pre class="code">{"lines": ["临时标签", "{日期} {时间}"], "size": [25, 15], "copies": 1}</pre>
+              </div>
+            </details>
+            <details class="ep">
+              <summary><span class="m post">POST</span><span class="path">/api/preview</span><span class="desc">生成预览图（不打印）</span></summary>
+              <div class="epb">
+                <p>参数同 <code>/api/print</code> 的 <code>template</code> / <code>fields</code>，另有 <code>scale</code>（放大倍数 1~8，默认 1）。返回 <code>image/png</code>，和实际打印的位图一模一样（203 dpi，25×15mm 是 200×120 像素）。也可以用 GET，变量写在网址里：</p>
+                <pre class="code"><span class="base"></span>/api/preview?template=生产日期标签&amp;scale=3&amp;品名=不锈钢螺丝</pre>
+              </div>
+            </details>
+            <details class="ep">
+              <summary><span class="m get">GET</span><span class="path">/api/status</span><span class="desc">打印机和服务状态</span></summary>
+              <div class="epb">
+                <pre class="code">{"ok": true,
+ "printer": {"model": "HPRT HM-T260L", "online": true, "can_print": true, "via": "usb",
+             "bt_port": "COM5", "checked_at": "2026-10-13T23:30:02"},
+ "server": {"version": "1.0.0", "port": 8765, "lan": true, "listen": "0.0.0.0",
+            "addresses": ["10.0.0.110"], "channel": "auto"},
+ "time": "2026-10-13T23:30:03"}</pre>
+                <p><code>printer.can_print</code> 为 <code>false</code> 时调用打印会返回 503；状态每 2 秒刷新一次。</p>
+              </div>
+            </details>
+            <details class="ep">
+              <summary><span class="m get">GET</span><span class="path">/api/templates</span><span class="desc">模板列表（含每个模板要填的变量）</span></summary>
+              <div class="epb">
+                <pre class="code">{"ok": true, "templates": [
+  {"id": "prod", "name": "生产日期标签", "size": [25, 15],
+   "elements": [
+     {"id": "e1", "type": "text", "x": 1, "y": 1.2, "w": 23, "text": "{品名}", "pt": 11, "bold": true, "align": "center", "shrink": true},
+     {"id": "e2", "type": "text", "x": 1, "y": 6.3, "w": 23, "text": "生产 {日期}", "pt": 9, "bold": false, "align": "center", "shrink": true},
+     {"id": "e3", "type": "rect", "x": 1, "y": 10.5, "w": 23, "h": 0.3}
+   ],
+   "fields": {"品名": "不锈钢螺丝"}, "serial": 25, "serial_step": 1,
+   "variables": [{"name": "品名", "auto": false}, {"name": "日期", "auto": true, "raw": "{日期}"}]}
+]}</pre>
+                <p><code>variables</code> 里 <code>auto: false</code> 的就是调用 <code>/api/print</code> 时要在 <code>fields</code> 里传的。元素坐标单位 mm；元素类型：<code>text</code> 文本（<code>pt</code> 是字号）/ <code>qr</code> 二维码 / <code>rect</code> 实心线条 / <code>box</code> 方框（<code>t</code> 是线宽）。单个模板：<code>GET /api/templates/{id或名称}</code>。</p>
+              </div>
+            </details>
+            <details class="ep">
+              <summary><span class="m get">GET</span><span class="path">/api/presets</span><span class="desc">标签尺寸预设</span></summary>
+              <div class="epb"><pre class="code">{"ok": true, "sizes": [[25, 15], [30, 20], [40, 30], [50, 30]]}</pre></div>
+            </details>
+            <details class="ep">
+              <summary><span class="m get">GET</span><span class="path">/api/ping</span><span class="desc">服务是否在线（不需要密钥）</span><span class="tag">公开</span></summary>
+              <div class="epb"><pre class="code">{"ok": true, "app": "hanyin-label", "version": "1.0.0"}</pre></div>
+            </details>
+
+            <h3 id="d-vars">变量写法</h3>
+            <p>模板的文本和二维码内容里都可以写变量，打印时自动替换：</p>
+            <div class="tblbox"><table class="tbl">
+              <thead><tr><th>写法</th><th>打印时变成（按现在实算）</th><th>说明</th></tr></thead>
+              <tbody id="var-rows"></tbody>
+            </table></div>
+
+            <h3 id="d-errors">错误码</h3>
+            <div class="tblbox"><table class="tbl">
+              <thead><tr><th>HTTP</th><th>含义</th><th>常见原因</th></tr></thead>
+              <tbody>
+                <tr><td>400</td><td>参数错误</td><td>JSON 格式不对、缺少变量、份数超范围、二维码内容太长</td></tr>
+                <tr><td>401</td><td>未授权</td><td>没带密钥、密钥写错或已被撤销</td></tr>
+                <tr><td>403</td><td>禁止</td><td>局域网访问没开；调用了只允许本机界面使用的接口</td></tr>
+                <tr><td>404</td><td>找不到</td><td>模板名称/id 不存在、接口路径写错</td></tr>
+                <tr><td>413</td><td>请求太大</td><td>请求体超过 2 MB</td></tr>
+                <tr><td>503</td><td>打印机未连接</td><td>USB 没插 / 打印机没开机或已自动关机 / 蓝牙连不上</td></tr>
+                <tr><td>500</td><td>服务内部错误</td><td>详见 data/server.log</td></tr>
+              </tbody>
+            </table></div>
+
+            <h3 id="d-code">代码示例</h3>
+            <div class="codetabs" role="tablist" aria-label="编程语言">
+              <button role="tab" class="on" data-code="py">Python</button>
+              <button role="tab" data-code="js">JavaScript</button>
+              <button role="tab" data-code="ps">PowerShell</button>
+              <button role="tab" data-code="curl">curl</button>
+            </div>
+            <pre class="code" data-codepanel="py">import requests
+
+BASE = "<span class="base"></span>"
+HEADERS = {"Authorization": "Bearer hm_你的密钥"}
+
+# 先看打印机能不能打
+st = requests.get(f"{BASE}/api/status", headers=HEADERS, timeout=5).json()
+if not st["printer"]["can_print"]:
+    raise SystemExit("打印机未连接")
+
+# 按模板打印 2 张
+r = requests.post(f"{BASE}/api/print", headers=HEADERS, timeout=30, json={
+    "template": "生产日期标签",
+    "fields": {"品名": "不锈钢螺丝"},
+    "copies": 2,
+})
+print(r.status_code, r.json())</pre>
+            <pre class="code" data-codepanel="js" hidden>const BASE = "<span class="base"></span>";
+const headers = { "Authorization": "Bearer hm_你的密钥", "Content-Type": "application/json" };
+
+const res = await fetch(`${BASE}/api/print`, {
+  method: "POST",
+  headers,
+  body: JSON.stringify({ template: "生产日期标签", fields: { "品名": "不锈钢螺丝" }, copies: 2 }),
+});
+const data = await res.json();
+if (!data.ok) throw new Error(data.error);   // 503 = 打印机未连接
+console.log(`已打印 ${data.printed} 张`);</pre>
+            <pre class="code" data-codepanel="ps" hidden>$base = "<span class="base"></span>"
+$headers = @{ Authorization = "Bearer hm_你的密钥" }
+$body = @{ template = "生产日期标签"; fields = @{ "品名" = "不锈钢螺丝" }; copies = 2 } | ConvertTo-Json
+
+# 中文要按 UTF-8 发送
+Invoke-RestMethod -Method Post -Uri "$base/api/print" -Headers $headers `
+  -ContentType "application/json; charset=utf-8" -Body ([Text.Encoding]::UTF8.GetBytes($body))</pre>
+            <pre class="code" data-codepanel="curl" hidden># Linux / macOS / Git Bash
+curl -X POST <span class="base"></span>/api/print \
+  -H "Authorization: Bearer hm_你的密钥" \
+  -H "Content-Type: application/json" \
+  -d '{"template": "生产日期标签", "fields": {"品名": "不锈钢螺丝"}, "copies": 2}'
+
+# 查状态
+curl <span class="base"></span>/api/status -H "Authorization: Bearer hm_你的密钥"</pre>
+
+            <h3 id="d-try">在线试一试</h3>
+            <p class="muted">选一个模板、填变量，看看接口会生成什么样的标签（只生成预览，不会打印）。</p>
+            <div class="try">
+              <div>
+                <label class="lbl"><span>模板</span><select id="try-tpl"></select></label>
+                <div class="fields" id="try-fields"></div>
+                <div><button class="secondary" id="try-go">生成预览</button></div>
+                <pre class="code" id="try-req"></pre>
+              </div>
+              <div><div class="real" id="try-img"><span class="muted">预览会显示在这里</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+</div>
+
+<dialog id="dlg-size">
+  <form class="dlg" method="dialog">
+    <h3>自定义标签尺寸</h3>
+    <div class="dlg-row">
+      <label class="lbl"><span>宽 (mm)</span><input class="txt" id="cs-w" type="number" min="10" max="50" step="0.5" value="35"></label>
+      <span style="padding-top:22px">×</span>
+      <label class="lbl"><span>高 (mm)</span><input class="txt" id="cs-h" type="number" min="8" max="200" step="0.5" value="25"></label>
+    </div>
+    <label class="dlg-row" style="font-size:13px"><input type="checkbox" id="cs-save" checked> 加入尺寸预设，下次一键选择</label>
+    <p class="muted">宽 = 横跨打印头方向（最宽 50mm，能打印的是 48mm）；高 = 出纸方向。</p>
+    <div class="dlg-actions"><button class="secondary" value="cancel">取消</button><button class="primary" value="ok">确定</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-var">
+  <form class="dlg" method="dialog">
+    <h3>新建自定义变量</h3>
+    <p>变量是打印时才填写的内容，比如品名、规格、价格。插入后会出现在「本次内容」里。</p>
+    <label class="lbl"><span>变量名</span><input class="txt" id="nv-name" maxlength="20" placeholder="例如：规格"></label>
+    <div class="dlg-actions"><button class="secondary" value="cancel">取消</button><button class="primary" value="ok">插入</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-batch">
+  <form class="dlg" method="dialog">
+    <h3>批量打印</h3>
+    <div id="batch-summary"></div>
+    <div class="dlg-actions"><button class="secondary" value="cancel">取消</button><button class="primary" value="ok" id="batch-ok">开始打印</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-key">
+  <form class="dlg" method="dialog">
+    <h3>新密钥已生成</h3>
+    <p>名称：<b id="nk-name"></b></p>
+    <div class="newkey"><code id="nk-key"></code><button class="copy" type="button" data-copy-from="#nk-key">复制</button></div>
+    <div class="notice">这是唯一一次显示完整密钥，请现在复制保存。关闭后只能看到开头和结尾几位。</div>
+    <div class="dlg-actions"><button class="primary" value="ok">我已保存</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="common.js"></script>
+<script src="editor.js"></script>
+<script src="apiview.js"></script>
+<script src="printerview.js"></script>
+<script src="settingsview.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
